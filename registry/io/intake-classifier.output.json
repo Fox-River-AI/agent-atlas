@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "intake-classifier output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["outcome"],
+  "properties": {
+    "outcome": { "enum": ["classified", "refused"] },
+    "category": { "enum": ["billing", "technical", "account", "other"] },
+    "urgency": { "enum": ["low", "normal", "high"] },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "refusal_reason": { "type": "string", "description": "Set when outcome is 'refused'." }
+  }
+}

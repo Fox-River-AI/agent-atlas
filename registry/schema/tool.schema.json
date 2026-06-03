@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/shanemeister/agent-atlas/registry/schema/tool.schema.json",
+  "title": "agent-atlas Tool manifest",
+  "description": "A declarative, versioned contract for one tool: the typed, audited integration boundary.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["apiVersion", "kind", "id", "version", "owner", "description", "effect", "auth"],
+  "properties": {
+    "apiVersion": { "const": "agent-atlas/v1" },
+    "kind": { "const": "Tool" },
+    "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "owner": { "type": "string", "minLength": 1 },
+    "description": { "type": "string", "minLength": 1 },
+    "effect": {
+      "enum": ["read", "write", "external"],
+      "description": "Effect class: 'read' is side-effect free, 'write' mutates internal state, 'external' calls a third party."
+    },
+    "auth": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scope"],
+      "properties": { "scope": { "type": "string" } }
+    },
+    "rate_limit": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": { "per_minute": { "type": "integer", "minimum": 1 } }
+    },
+    "reused_by": {
+      "type": "array",
+      "description": "The agents that call this tool. Surfaces shared dependencies and near-duplicate agents in one place.",
+      "items": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+      "uniqueItems": true
+    }
+  }
+}

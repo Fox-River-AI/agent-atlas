@@ -1,0 +1,19 @@
+apiVersion: agent-atlas/v1
+kind: Tool
+id: knowledge-base-search
+version: 1.0.0
+owner: platform-team
+description: Full-text search over the public support knowledge base.
+
+# Effect class: read is side-effect free; write mutates; external calls a third party.
+effect: read
+
+auth:
+  scope: kb:read
+
+rate_limit:
+  per_minute: 60
+
+# The agents that call this tool. Checked bidirectionally against their allowlists.
+reused_by:
+  - intake-classifier

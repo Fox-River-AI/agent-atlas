@@ -1,0 +1,43 @@
+apiVersion: agent-atlas/v1
+kind: Agent
+id: intake-classifier
+version: 1.0.0
+owner: platform-team
+
+# A single responsibility. If you need "and" to state it, you have two agents.
+responsibility: >-
+  Classify an inbound customer message into one support category and an urgency
+  level.
+
+model:
+  provider: anthropic
+  name: claude-haiku-4-5
+  pinned: claude-haiku-4-5-20251001
+  parameters:
+    temperature: 0
+    max_tokens: 512
+
+# Typed contracts at the boundary; scaffolding is generated from these schemas.
+io:
+  input: registry/io/intake-classifier.input.json
+  output: registry/io/intake-classifier.output.json
+
+# Allowlist: the only tools this agent may call.
+tools:
+  - knowledge-base-search
+
+# Refusal is a first-class output, not an exception.
+refusal:
+  conditions:
+    - The message is empty or contains no classifiable text.
+    - The request is outside support triage (e.g., an account change or a payment).
+  emits: refused
+
+# The decisions this agent records, so "why did it do that" is answerable.
+telemetry:
+  emits:
+    - name: agent.intake_classifier.classification
+      attributes:
+        - category
+        - urgency
+        - confidence

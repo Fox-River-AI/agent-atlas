@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "deny": [
+      "Bash(git push:*)",
+      "Write(.env)",
+      "Write(**/secrets/**)"
+    ],
+    "ask": [
+      "Write(registry/**)",
+      "Edit(registry/**)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 governance/hooks/validate_against_registry.py"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/shanemeister/agent-atlas/registry/schema/tool.schema.json",
+  "$id": "https://raw.githubusercontent.com/Fox-River-AI/agent-atlas/main/registry/schema/tool.schema.json",
   "title": "agent-atlas Tool manifest",
   "description": "A declarative, versioned contract for one tool: the typed, audited integration boundary.",
   "type": "object",

@@ -14,8 +14,7 @@ they share. `agent-atlas` treats an agent fleet as the distributed system it
 actually is — with a registry, typed contracts, and visibility — instead of a
 pile of prompts.
 
-> Background and rationale:
-> *The Agent Registry — Governing Agentic AI Like the Microservices Estate It Actually Is* — [link]
+> Background and rationale: see [`docs/reference-architecture.md`](docs/reference-architecture.md).
 
 ## The model: three capabilities (the Erwin pattern)
 

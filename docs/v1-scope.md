@@ -1,5 +1,13 @@
 # v1 scope — forward generator + visibility graph
 
+> **Superseded (2026-06-03).** This doc scoped a small agent+tool CLI before the
+> object model expanded to seven kinds (orchestrator / task / agent / tool / job
+> / router / system) and the visual modeler — [agent-atlas-studio](https://github.com/Fox-River-AI/agent-atlas-studio)
+> — became the front end (it does the "visibility graph" goal, live). The
+> per-object schemas now live in `registry/schema/`. Kept for historical context
+> and the still-relevant forward-generator/CLI design; see the README and
+> agent-atlas-studio's `docs/STATUS.md` for the current plan.
+
 **Status:** scoped, not started (2026-06-02).
 
 ## Goal

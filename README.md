@@ -3,58 +3,77 @@
 **Model your agentic system. See the one that's actually running.**
 
 `agent-atlas` is an open, Erwin-style approach to governing an agentic AI
-system: a version-controlled registry that is the single source of truth for
-every agent and tool, tooling to *forward-engineer* a fleet from that registry,
-and — on the roadmap — to *reverse-engineer* the running system from its
-telemetry and diff reality against the design.
+platform: a version-controlled **registry** that is the single source of truth
+for every object in the system, **schemas + validators** that keep it honest,
+and **governance** that keeps an AI coding agent building to the spec. It treats
+an agent fleet as the distributed system it actually is — with a registry, typed
+contracts, and visibility — instead of a pile of prompts.
 
-It exists because agentic systems tend to rot the same way: six months in,
-nobody can say how many agents are running, what each one does, or which tools
-they share. `agent-atlas` treats an agent fleet as the distributed system it
-actually is — with a registry, typed contracts, and visibility — instead of a
-pile of prompts.
+This repo is the **engine** (the schema + validators + governance). The visual
+modeler built on it is **[agent-atlas-studio](https://github.com/Fox-River-AI/agent-atlas-studio)**
+— **▶ [try it live](https://fox-river-ai.github.io/agent-atlas-studio/)** (in your
+browser, no install).
 
 > Background and rationale: see [`docs/reference-architecture.md`](docs/reference-architecture.md).
 
-## The model: three capabilities (the Erwin pattern)
+## The object model
 
-- **Forward** — design the fleet in the registry, then generate manifests,
-  schemas, and scaffolding. *(v1, in progress)*
-- **Visibility** — render the registry as a live map of agents, tools, and
-  their relationships. *(v1, in progress)*
-- **Reverse + conformance** — recover the actual agent/tool graph from
-  OpenTelemetry traces and diff it against the declared registry to show where
-  reality has drifted from design. *(v2, planned)*
+Every object in the platform is a declarative, versioned manifest — OpenAPI in
+spirit, for agents. Seven first-class kinds:
 
-## What's here today
+| Kind | Manifest | Role |
+|---|---|---|
+| **Orchestrator** | `*.orchestrator.yaml` | the single control plane — which task/agent runs, in what order, on what condition; externalizes run state |
+| **Task** | _(orchestration-level grouping)_ | a stage of the workflow that groups the agents carrying it out |
+| **Agent** | `*.agent.yaml` | single-responsibility worker; a **pinned model OR a router reference**; refusal as a first-class output; typed I/O; tool allowlist; declared telemetry |
+| **MCP Tool** | `*.tool.yaml` | the typed, audited call boundary — effect class (`read` / `write` / `external`), auth scope, `reused_by` |
+| **Job** | `*.job.yaml` | long-running / async work — queue, timeout, retries |
+| **Router** | `*.router.yaml` | dynamic model selection — candidate models + a routing policy (complexity / quality / cost) |
+| **System** | `*.system.yaml` | datastores & external systems agents touch — relational / vector / graph / document store, FHIR, external API, state store |
 
-- `registry/` — the manifest schema and worked examples: an agent contract
-  (single responsibility, typed I/O, tool allowlist, refusal policy, emitted
-  telemetry) and a tool contract (effect class, auth scope, reuse).
-- `governance/` — the build-time alignment pattern for working with an AI
+You generate documentation, scaffolding, and the visibility map *from* the
+registry rather than maintaining them alongside the code and watching them
+drift. The registry is the enumerable answer to "what do I have, what does each
+thing do, and what does it touch."
+
+## What's here
+
+- **`registry/`** — the manifest **schemas** (`registry/schema/`, the single
+  source of truth) and worked examples.
+- **`governance/`** — the build-time alignment pattern for working with an AI
   coding agent: negotiable guidance (`CLAUDE.md`) versus enforced boundaries
-  (permission rules and a `PreToolUse` hook, plus a CI validator that holds
-  regardless of who or what writes the code).
-- `docs/` — the reference architecture.
+  (permission rules and a `PreToolUse` hook), plus a **CI validator** that holds
+  regardless of who or what writes the code — per-manifest schema checks plus
+  cross-manifest consistency (tool allowlists resolve, `reused_by` is
+  bidirectional, ids match filenames).
+- **`docs/`** — the reference architecture.
 
-## How it works
+## The loop — design ⇄ build ⇄ verify
 
-Every agent and tool is a declarative, versioned manifest — OpenAPI in spirit,
-for agents. You generate documentation, scaffolding, and the visibility map
-*from* the registry rather than maintaining them alongside the code and watching
-them drift. The registry is the enumerable answer to "what do I have, what does
-each thing do, and what does it touch."
+- **Model** — design the platform in the registry (the [studio](https://github.com/Fox-River-AI/agent-atlas-studio)
+  does this visually and validates live). ✅
+- **Build handoff** — generate the contract (`CLAUDE.md`) + enforcement hooks an
+  AI coding agent builds the system against; the registry says what each object
+  becomes (an agent module, a tool integration, a queued job, a model-selection
+  policy, the orchestrator's control flow). 🔜
+- **Reverse + conformance** — recover the *running* system's agent/tool graph
+  from OpenTelemetry traces and diff it against the declared registry, to show
+  where reality has drifted from design. 📋
+
+The registry is the **spec**, `CLAUDE.md` is the **contract**, the hooks are the
+**enforcement**, and conformance proves the model is *true* — not just drawn.
 
 ## Status
 
-Early and honest. The registry schema, the governance pattern, and the
-reference architecture are defined and usable today; the forward generator and
-the visibility renderer are in active development. Roadmap items are marked
-above — nothing here pretends to be further along than it is.
+Honest and current. The **schemas, the governance pattern, and the CI validator
+are usable today**, and the [studio](https://github.com/Fox-River-AI/agent-atlas-studio)
+models the full object set against them with live validation and registry
+export. The build-handoff generator and reverse-engineering / conformance are on
+the roadmap above.
 
 ## Contributing
 
-Issues and discussion are welcome. This is maintained as an open reference for
+Issues and discussion welcome. Maintained as an open reference for
 agentic-system governance.
 
 ## License

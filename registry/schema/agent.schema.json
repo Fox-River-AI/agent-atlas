@@ -18,15 +18,28 @@
       "description": "A single responsibility. If you need the word 'and' to state it, you have two agents."
     },
     "model": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["provider", "name", "pinned"],
-      "properties": {
-        "provider": { "type": "string" },
-        "name": { "type": "string" },
-        "pinned": { "type": "string", "description": "The exact, pinned model version." },
-        "parameters": { "type": "object" }
-      }
+      "description": "Either a single pinned model (the default, reproducible case) OR a reference to a Router for dynamic model selection. Exactly one — never both.",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["provider", "name", "pinned"],
+          "properties": {
+            "provider": { "type": "string" },
+            "name": { "type": "string" },
+            "pinned": { "type": "string", "description": "The exact, pinned model version." },
+            "parameters": { "type": "object" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["router"],
+          "properties": {
+            "router": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$", "description": "id of a Router that selects the model dynamically." }
+          }
+        }
+      ]
     },
     "io": {
       "type": "object",

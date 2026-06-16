@@ -18,7 +18,7 @@
       "description": "A single responsibility. If you need the word 'and' to state it, you have two agents."
     },
     "model": {
-      "description": "Either a single pinned model (the default, reproducible case) OR a reference to a Router for dynamic model selection. Exactly one — never both.",
+      "description": "How this agent reasons. EXACTLY ONE of: a single pinned LLM (the default, reproducible case); a Router reference for dynamic LLM selection; OR a deterministic/analytical ENGINE (the agent's reasoning is code — a solver or an analytical optimizer — NOT a language model). The engine variant is what lets a domain-agnostic estate declare a formal reasoner (ASP/SMT) or an analytical proposer (e.g. Kelly sizing) without falsely pinning it to an LLM.",
       "oneOf": [
         {
           "type": "object",
@@ -37,6 +37,17 @@
           "required": ["router"],
           "properties": {
             "router": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$", "description": "id of a Router that selects the model dynamically." }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["engine", "impl"],
+          "description": "A deterministic/analytical engine — the agent's 'reasoning' is code, not a language model. Use for formal reasoners (ASP/Clingo, SMT/Z3) and analytical optimizers (fractional-Kelly, Bayesian sizing). Pinning such an agent to an LLM is a category error that silently turns a proof or an optimum into a plausible guess.",
+          "properties": {
+            "engine": { "enum": ["deterministic", "analytical"], "description": "'deterministic' = a logic/constraint solver whose output is a proof or a fixed computation (ASP/SMT). 'analytical' = a closed-form/optimization method (Kelly, Bayesian)." },
+            "impl": { "type": "string", "minLength": 1, "description": "The concrete implementation, pinned for reproducibility (e.g. 'clingo-5.8.0', 'fractional-kelly-v1', 'z3-4.13')." },
+            "parameters": { "type": "object" }
           }
         }
       ]
@@ -85,6 +96,35 @@
             }
           }
         }
+      }
+    },
+    "prohibited_tools": {
+      "type": "array",
+      "description": "NEGATIVE declaration (NIST Govern: 'prohibited actions'). Tool ids this agent must NEVER call, even if otherwise reachable — distinct from the positive `tools` allowlist. Conformance can flag a runtime call to any of these.",
+      "items": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+      "uniqueItems": true
+    },
+    "grounding_threshold": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Confidence gate: the agent should refuse rather than answer when grounding/confidence falls below this (e.g. 0.95 for regulated domains). The declared bound conformance checks runtime behavior against."
+    },
+    "escalation_to": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$",
+      "description": "id of the System/Job/queue this agent escalates to on refusal or low confidence — escalation as a named target, not just a refusal flag."
+    },
+    "governance": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Regime-neutral trust/privacy controls (NIST AI RMF: privacy, security, accountability). The control is declared here; which standard it satisfies is named by data_tags and the model-level compliance_regimes. Optional — declare what the requirements state; leave the rest for a human.",
+      "properties": {
+        "data_classification": { "enum": ["public", "internal", "confidential", "regulated"], "description": "Sensitivity of the data this object touches." },
+        "data_tags": { "type": "array", "description": "Regulatory data classes (MULTIPLE may apply, e.g. PHI and PII).", "items": { "type": "string" }, "uniqueItems": true },
+        "residency": { "enum": ["any", "in-region", "on-prem"], "description": "Where data may be processed/stored. 'on-prem' = never leaves the boundary." },
+        "retention": { "type": "string", "description": "Retention policy, e.g. '7y', '30d', 'none'." },
+        "redaction": { "type": "array", "description": "Fields to filter/redact/drop before telemetry is indexed (so observability isn't a compliance liability).", "items": { "type": "string" }, "uniqueItems": true }
       }
     }
   }

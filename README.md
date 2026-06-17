@@ -19,17 +19,24 @@ browser, no install).
 ## The object model
 
 Every object in the platform is a declarative, versioned manifest — OpenAPI in
-spirit, for agents. Seven first-class kinds:
+spirit, for agents. Seven first-class **component** kinds (the system), plus a separate
+**controls layer** — the gate (controls over the system's consequential transitions):
 
 | Kind | Manifest | Role |
 |---|---|---|
-| **Orchestrator** | `*.orchestrator.yaml` | the single control plane — which task/agent runs, in what order, on what condition; externalizes run state |
+| **Orchestrator** | `*.orchestrator.yaml` | the single control plane — which task/agent runs, in what order, on what condition; externalizes run state; **owns the gates** |
 | **Task** | _(orchestration-level grouping)_ | a stage of the workflow that groups the agents carrying it out |
-| **Agent** | `*.agent.yaml` | single-responsibility worker; a **pinned model OR a router reference**; refusal as a first-class output; typed I/O; tool allowlist; declared telemetry |
-| **MCP Tool** | `*.tool.yaml` | the typed, audited call boundary — effect class (`read` / `write` / `external`), auth scope, `reused_by` |
+| **Agent** | `*.agent.yaml` | single-responsibility **LLM** worker; a **pinned model OR a router reference**; refusal as a first-class output; typed I/O; tool allowlist; declared telemetry |
+| **MCP Tool** | `*.tool.yaml` | the typed, audited call boundary — effect class (`read` / `write` / `external`), auth scope, `reused_by`; owned by an agent or the orchestrator |
 | **Job** | `*.job.yaml` | long-running / async work — queue, timeout, retries |
 | **Router** | `*.router.yaml` | dynamic model selection — candidate models + a routing policy (complexity / quality / cost) |
 | **System** | `*.system.yaml` | datastores & external systems agents touch — relational / vector / graph / document store, FHIR, external API, state store |
+
+**Controls layer** — a different axis (assets vs controls), not an eighth component kind:
+
+| Kind | Manifest | Role |
+|---|---|---|
+| **Gate** | `*.gate.yaml` | a control over one consequential transition. Binds the transition to a **pluggable deterministic reasoner** (`{engine, impl, version}` — ASP/Clingo today, SMT reservable; **never an LLM**), the rules + fact-schema it proves against, and a `mode` (`shadow`/`live`). The proof spine's home and the conformance-evidence surface. Owned by the orchestrator; a gated stage references it. No LLM/agent in the proof's path — the schema's `additionalProperties:false` on `reasoner` enforces it. |
 
 You generate documentation, scaffolding, and the visibility map *from* the
 registry rather than maintaining them alongside the code and watching them
